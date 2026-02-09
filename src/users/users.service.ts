@@ -22,7 +22,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string, includePassword?: boolean) {
-    return await this.prisma.user.findFirst({
+    return await this.prisma.user.findUnique({
       where: { email },
       omit: { password: !includePassword },
     });
