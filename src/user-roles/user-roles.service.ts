@@ -8,13 +8,27 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RolesService } from 'src/roles/roles.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class UserRolesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
+    private readonly rolesService: RolesService,
+  ) {}
 
   async assignRoleToUser(userId: string, roleId: string) {
-    const exists = await this.findOne(userId, roleId);
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new BadRequestException('Utilisateur introuvable');
+
+    const role = await this.rolesService.findOne(roleId);
+    if (!role) throw new BadRequestException('Rôle introuvable');
+
+    const exists = await this.prisma.userRole.findUnique({
+      where: { userId_roleId: { userId, roleId } },
+    });
     if (exists) throw new ConflictException('Rôle déjà ajouté');
 
     return await this.prisma.userRole.create({
@@ -22,19 +36,11 @@ export class UserRolesService {
     });
   }
 
-  async updateRoleFromUser(userId: string, roleId: string) {
-    const exists = await this.findOne(userId, roleId);
-    if (!exists)
-      throw new BadRequestException("La rôle n'a pas encore été ajouté");
-
-    return await this.prisma.userRole.delete({
-      where: { userId_roleId: { userId, roleId } },
+  async updateRoleFromUser(userId: string, roleId: string, oldRoleId: string) {
+    await this.prisma.userRole.delete({
+      where: { userId_roleId: { userId, roleId: oldRoleId } },
     });
-  }
 
-  private async findOne(userId: string, roleId: string) {
-    return await this.prisma.userRole.findUnique({
-      where: { userId_roleId: { userId, roleId } },
-    });
+    return await this.assignRoleToUser(userId, roleId);
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Body, Controller, Post, Put } from '@nestjs/common';
+import { Body, Controller, Patch, Post } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 import { UpdateRoleFromUserDto } from './dto/update-role-from-user.dto';
@@ -22,8 +22,14 @@ export class UserRolesController {
     summary: 'Permet de modifier le rôle attribué à un utilisateur',
   })
   @Permissions('role:manage')
-  @Put('update-role-from-user')
-  async updateRoleFromUser(@Body() { userId, roleId }: UpdateRoleFromUserDto) {
-    return await this.userRolesService.updateRoleFromUser(userId, roleId);
+  @Patch('update-role-from-user')
+  async updateRoleFromUser(
+    @Body() { userId, roleId, oldRoleId }: UpdateRoleFromUserDto,
+  ) {
+    return await this.userRolesService.updateRoleFromUser(
+      userId,
+      roleId,
+      oldRoleId,
+    );
   }
 }
