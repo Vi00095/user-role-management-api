@@ -3,6 +3,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { RolePermissionsService } from './role-permissions.service';
 import { GrantPermissionToRoleDto } from './dto/grant-permission-to-role.dto';
 import { RevokePermissionFromRoleDto } from './dto/revoke-permission-from-role.dto';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
 
 @Controller('roles')
 export class RolePermissionsController {
@@ -10,6 +11,7 @@ export class RolePermissionsController {
     private readonly rolePermissionsService: RolePermissionsService,
   ) {}
 
+  @Permissions('role:manage')
   @Post('grant-permission-to-role')
   async grantPermissionToRole(
     @Body() { roleId, permissionId }: GrantPermissionToRoleDto,
@@ -20,6 +22,7 @@ export class RolePermissionsController {
     );
   }
 
+  @Permissions('role:manage')
   @Post('revoke-permission-from-role')
   async revokePermissionFromRole(
     @Body() { roleId, permissionId }: RevokePermissionFromRoleDto,

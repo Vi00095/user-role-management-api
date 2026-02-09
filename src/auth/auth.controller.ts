@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
+import { Permissions } from './decorators/permissions.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
+  @Permissions('user:read')
   @Get('me')
   me(@Request() req) {
     return req.user;
