@@ -24,8 +24,11 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email, true);
     if (!user) throw new BadRequestException('Utilisateur introuvable');
+
+    if (user.status !== 'ACTIVE')
+      throw new UnauthorizedException('Compte inactif');
 
     const isValidPassword = await bcrypt.compare(pass, user.password);
     if (!isValidPassword)
